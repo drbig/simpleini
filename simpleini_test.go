@@ -1,6 +1,8 @@
 package simpleini
 
 import (
+	"bytes"
+	"fmt"
 	"io"
 	"strings"
 	"testing"
@@ -252,5 +254,165 @@ func TestBadGetBool(t *testing.T) {
 	_, err = ini.GetBool("a", "sval")
 	if err == nil {
 		t.Errorf("Non-int property returned as bool")
+	}
+}
+
+func TestSetStringRedefine(t *testing.T) {
+	input := strings.NewReader("[a]\nval=1")
+
+	ini, _ := Parse(input)
+	val, _ := ini.GetString("a", "val")
+	if val != "1" {
+		t.Errorf("Bad inital value for a/val")
+		return
+	}
+	ini.SetString("a", "val", "2")
+	val, _ = ini.GetString("a", "val")
+	if val != "2" {
+		t.Errorf("Bad posterior value for a/val")
+		return
+	}
+}
+
+func TestSetString(t *testing.T) {
+	input := strings.NewReader("")
+
+	ini, _ := Parse(input)
+	_, err := ini.GetString("a", "val")
+	if err == nil {
+		t.Errorf("Got inital value for a/val")
+		return
+	}
+	ini.SetString("a", "val", "2")
+	val, _ := ini.GetString("a", "val")
+	if val != "2" {
+		t.Errorf("Bad posterior value for a/val")
+		return
+	}
+}
+
+func TestSetIntRedefine(t *testing.T) {
+	input := strings.NewReader("[a]\nval=1")
+
+	ini, _ := Parse(input)
+	val, _ := ini.GetInt("a", "val")
+	if val != 1 {
+		t.Errorf("Bad inital value for a/val")
+		return
+	}
+	ini.SetInt("a", "val", 2)
+	val, _ = ini.GetInt("a", "val")
+	if val != 2 {
+		t.Errorf("Bad posterior value for a/val")
+		return
+	}
+}
+
+func TestSetInt(t *testing.T) {
+	input := strings.NewReader("")
+
+	ini, _ := Parse(input)
+	_, err := ini.GetInt("a", "val")
+	if err == nil {
+		t.Errorf("Got inital value for a/val")
+		return
+	}
+	ini.SetInt("a", "val", 2)
+	val, _ := ini.GetInt("a", "val")
+	if val != 2 {
+		t.Errorf("Bad posterior value for a/val")
+		return
+	}
+}
+
+func TestSetBoolRedefine(t *testing.T) {
+	input := strings.NewReader("[a]\nval=yes")
+
+	ini, _ := Parse(input)
+	val, _ := ini.GetBool("a", "val")
+	if !val {
+		t.Errorf("Bad inital value for a/val")
+		return
+	}
+	ini.SetBool("a", "val", false)
+	val, _ = ini.GetBool("a", "val")
+	if val {
+		t.Errorf("Bad posterior value for a/val")
+		return
+	}
+}
+
+func TestSetBool(t *testing.T) {
+	input := strings.NewReader("")
+
+	ini, _ := Parse(input)
+	_, err := ini.GetBool("a", "val")
+	if err == nil {
+		t.Errorf("Got inital value for a/val")
+		return
+	}
+	ini.SetBool("a", "val", true)
+	val, _ := ini.GetBool("a", "val")
+	if !val {
+		t.Errorf("Bad posterior value for a/val")
+		return
+	}
+}
+
+func TestWritePretty(t *testing.T) {
+	ini := NewINI()
+	ini.SetString("main", "greeting", "hello world")
+	ini.SetBool("main", "works", true)
+	ini.SetInt("main", "number", 41)
+	ini.SetString("other", "greeting", "cześć!")
+	var buf bytes.Buffer
+	err := ini.Write(&buf, true)
+	if err != nil {
+		t.Errorf("Write error: %s", err)
+		return
+	}
+	if buf.String() != `[main]
+greeting = hello world
+number = 41
+works = yes
+
+[other]
+greeting = cześć!
+
+` {
+		t.Errorf("Output mismatch")
+		fmt.Println(buf.String())
+	}
+}
+
+type errorWriterTest struct {
+	left int
+	err  error
+}
+
+func (w errorWriterTest) Write(p []byte) (int, error) {
+	if len(p) < w.left {
+		w.left -= len(p)
+		return len(p), nil
+	}
+	return 0, w.err
+}
+
+var errorWriterTests = []errorWriterTest{
+	{3, io.ErrShortWrite},
+	{23, io.ErrShortWrite},
+}
+
+func TestBadWrite(t *testing.T) {
+	ini := NewINI()
+	ini.SetString("main", "greeting", "hello world")
+	ini.SetBool("main", "works", true)
+	ini.SetInt("main", "number", 41)
+	ini.SetString("other", "greeting", "cześć!")
+	for idx, w := range errorWriterTests {
+		err := ini.Write(&w, false)
+		if err == nil {
+			t.Errorf("(%d) Should return error", idx+1)
+		}
 	}
 }

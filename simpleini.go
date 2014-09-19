@@ -4,18 +4,27 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"sort"
 	"strconv"
 	"strings"
+)
+
+const (
+	CRLF     = "\n"
+	DICTSIZE = 8
 )
 
 type INI struct {
 	dict map[string]map[string]string
 }
 
+func NewINI() *INI {
+	return &INI{dict: make(map[string]map[string]string, DICTSIZE)}
+}
+
 func Parse(input io.Reader) (*INI, error) {
 	scn := bufio.NewScanner(input)
-	ini := &INI{}
-	ini.dict = make(map[string]map[string]string, 8)
+	ini := NewINI()
 
 	var section string
 	lineNum := 1
@@ -37,7 +46,7 @@ func Parse(input io.Reader) (*INI, error) {
 			if _, present := ini.dict[section]; present {
 				return nil, fmt.Errorf("Line %d: Section '%s' has been defined previosuly", lineNum, section)
 			}
-			ini.dict[section] = make(map[string]string, 8)
+			ini.dict[section] = make(map[string]string, DICTSIZE)
 		default:
 			if section == "" {
 				return nil, fmt.Errorf("Line %d: Property defined outside of a section", lineNum)
@@ -114,4 +123,52 @@ func (i *INI) GetBool(section string, property string) (bool, error) {
 	default:
 		return false, fmt.Errorf("Property '%s/%s' is not a boolean", section, property)
 	}
+}
+
+func (i *INI) SetString(section string, property string, value string) {
+	properties, present := i.dict[section]
+	if !present {
+		properties = make(map[string]string, DICTSIZE)
+		i.dict[section] = properties
+	}
+	properties[property] = value
+	return
+}
+
+func (i *INI) SetInt(section string, property string, value int) {
+	i.SetString(section, property, strconv.Itoa(value))
+	return
+}
+
+func (i *INI) SetBool(section string, property string, value bool) {
+	var strVal string
+	if value {
+		strVal = "yes"
+	} else {
+		strVal = "no"
+	}
+	i.SetString(section, property, strVal)
+	return
+}
+
+func (i *INI) Write(output io.Writer, prettify bool) error {
+	buf := bufio.NewWriter(output)
+	sections := i.Sections()
+	if prettify {
+		sort.Strings(sections)
+	}
+	for _, section := range sections {
+		buf.WriteString("[" + section + "]" + CRLF)
+		properties, _ := i.Properties(section)
+		if prettify {
+			sort.Strings(properties)
+		}
+		for _, property := range properties {
+			buf.WriteString(property + " = " + i.dict[section][property] + CRLF)
+		}
+		if prettify {
+			buf.WriteString(CRLF)
+		}
+	}
+	return buf.Flush()
 }
