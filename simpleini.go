@@ -12,6 +12,7 @@ import (
 const (
 	CRLF     = "\n"
 	DICTSIZE = 8
+	VERSION  = "0.0.1"
 )
 
 type INI struct {
