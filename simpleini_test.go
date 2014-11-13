@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"os"
 	"strings"
 	"testing"
 )
@@ -417,4 +418,17 @@ func TestBadWrite(t *testing.T) {
 			t.Errorf("(%d) Should return error", idx+1)
 		}
 	}
+}
+
+func ExampleNewINI() {
+	i := NewINI()
+	i.SetString("example 1", "comment", "an example section")
+	i.SetInt("example 1", "magic number", 31337)
+	i.SetBool("example 1", "fun", true)
+	i.Write(os.Stdout, true)
+	// Output:
+	// [example 1]
+	// comment = an example section
+	// fun = yes
+	// magic number = 31337
 }
