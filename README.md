@@ -1,4 +1,4 @@
-# simpleini
+# simpleini [![Build Status](https://travis-ci.org/drbig/simpleini.svg?branch=master)](https://travis-ci.org/drbig/simpleini) [![Coverage Status](https://img.shields.io/coveralls/drbig/simpleini.svg)](https://coveralls.io/r/drbig/simpleini?branch=master) [![GoDoc](https://godoc.org/github.com/drbig/simpleini?status.svg)](http://godoc.org/github.com/drbig/simpleini)
 
 A Go library implementing yet another interface to a particular subset of INI files.
 
