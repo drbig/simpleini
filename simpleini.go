@@ -1,5 +1,8 @@
 // See LICENSE.txt for licensing information.
 
+// Package simpleini implements yet another interface to a particular subset of INI files.
+// In particular it doesn't allow 'out-of-section' keys, has no required sections, is
+// line-ending agnostic and provides dedicated getters and setter for the basic data types.
 package simpleini
 
 import (
@@ -11,19 +14,25 @@ import (
 	"strings"
 )
 
+// Internal constants.
 const (
-	DICTSIZE = 8
-	VERSION  = "0.0.1"
+	DICTSIZE = 8       // default size of the dictionary
+	VERSION  = "0.0.1" // current version of the library
 )
 
+// INI represents a INI file data.
+// Currently it consist only of the raw dictionary. It has been defined as a struct to
+// make future additions backward compatible (e.g. original file path).
 type INI struct {
 	dict map[string]map[string]string
 }
 
+// NewINI returns an INI with default settings.
 func NewINI() *INI {
 	return &INI{dict: make(map[string]map[string]string, DICTSIZE)}
 }
 
+// Parse tries to parse an input into an INI.
 func Parse(input io.Reader) (*INI, error) {
 	scn := bufio.NewScanner(input)
 	ini := NewINI()
@@ -68,6 +77,7 @@ func Parse(input io.Reader) (*INI, error) {
 	return ini, nil
 }
 
+// Sections return a slice of sections from an INI.
 func (i *INI) Sections() []string {
 	var sections []string
 	for s := range i.dict {
@@ -76,6 +86,7 @@ func (i *INI) Sections() []string {
 	return sections
 }
 
+// Properties returns a slice of properties (keys) form a given section of an INI.
 func (i *INI) Properties(section string) ([]string, error) {
 	properties, present := i.dict[section]
 	if !present {
@@ -88,6 +99,7 @@ func (i *INI) Properties(section string) ([]string, error) {
 	return ps, nil
 }
 
+// GetString tries to return a string representation from a section - property pair of an INI.
 func (i *INI) GetString(section string, property string) (string, error) {
 	properties, present := i.dict[section]
 	if !present {
@@ -100,6 +112,7 @@ func (i *INI) GetString(section string, property string) (string, error) {
 	return value, nil
 }
 
+// GetInt tries to return an integer representation from a section - property pair of an INI.
 func (i *INI) GetInt(section string, property string) (int, error) {
 	strVal, err := i.GetString(section, property)
 	if err != nil {
@@ -112,6 +125,8 @@ func (i *INI) GetInt(section string, property string) (int, error) {
 	return intVal, err
 }
 
+// GetBool tries to return a bool representation from a section - property pair of an INI.
+// Values that map to true: 'true', 'yes', 'on'; and respective values map to false.
 func (i *INI) GetBool(section string, property string) (bool, error) {
 	strVal, err := i.GetString(section, property)
 	if err != nil {
@@ -127,6 +142,8 @@ func (i *INI) GetBool(section string, property string) (bool, error) {
 	}
 }
 
+// SetString sets a section - property pair to the given value, creating it if it wasn't
+// already present.
 func (i *INI) SetString(section string, property string, value string) {
 	properties, present := i.dict[section]
 	if !present {
@@ -137,11 +154,15 @@ func (i *INI) SetString(section string, property string, value string) {
 	return
 }
 
+// SetInt sets a section - property pair to the given value, creating it if it wasn't
+// already present.
 func (i *INI) SetInt(section string, property string, value int) {
 	i.SetString(section, property, strconv.Itoa(value))
 	return
 }
 
+// SetBool sets a section - property pair to the given value, creating it if it wasn't
+// already present.
 func (i *INI) SetBool(section string, property string, value bool) {
 	var strVal string
 	if value {
@@ -153,6 +174,9 @@ func (i *INI) SetBool(section string, property string, value bool) {
 	return
 }
 
+// Write tries to output the INI onto an output.
+// The prettify option sorts the sections and properties within for better user
+// experience.
 func (i *INI) Write(output io.Writer, prettify bool) error {
 	buf := bufio.NewWriter(output)
 	sections := i.Sections()
