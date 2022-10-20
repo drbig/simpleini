@@ -23,5 +23,6 @@ Standard two-clause BSD license, see LICENSE.txt for details.
 
 Any contributions will be licensed under the same conditions.
 
-Copyright (c) 2014 Piotr S. Staszewski
+Copyright (c) 2014 Piotr S. Staszewski  
+Copyright (c) 2022 Pedro F. Albanese
 
