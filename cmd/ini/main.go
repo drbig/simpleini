@@ -13,7 +13,7 @@ import (
 var (
 	p = flag.String("p", "", "Parameter (imperative, omit to list parameters)")
 	s = flag.String("s", "", "Section (imperative, omit to list sections)")
-	v = flag.String("v", "", "Value ('-' or '?' for delete entry)")
+	v = flag.String("v", "", "Value (optative, omit to get value)")
 	f = flag.String("f", "", "Target INI File ('-' for stdin/stdout)")
 	d = flag.Bool("d", false, "Delete Section or Parameter")
 )
