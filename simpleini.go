@@ -202,3 +202,10 @@ func (i *INI) Write(output io.Writer, prettify bool) error {
 func DeleteSection(ini *INI, section string) {
 	delete(ini.dict, section)
 }
+
+func DeleteProperty(ini *INI, section string, property string) {
+	properties, present := ini.dict[section]
+	if present {
+		delete(properties, property)
+	}
+}
