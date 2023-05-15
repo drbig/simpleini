@@ -198,3 +198,7 @@ func (i *INI) Write(output io.Writer, prettify bool) error {
 	}
 	return buf.Flush()
 }
+
+func DeleteSection(ini *INI, section string) {
+	delete(ini.dict, section)
+}
