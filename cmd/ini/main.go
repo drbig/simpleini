@@ -11,18 +11,14 @@ import (
 )
 
 var (
-	p = flag.String("p", "", "Parameter (imperative, omit to list parameters)")
-	s = flag.String("s", "", "Section (imperative, omit to list sections)")
-	v = flag.String("v", "", "Value (optative, omit to get value)")
 	f = flag.String("f", "", "Target INI File ('-' for stdin/stdout)")
-	d = flag.Bool("d", false, "Delete Section or Parameter")
 )
 
 func main() {
 	flag.Parse()
 
 	if len(os.Args) < 2 {
-		fmt.Fprintln(os.Stderr, "Usage of "+os.Args[0]+": ")
+		fmt.Fprintf(os.Stderr, "Usage: %s set|get|del [section] [parameter] [value]\n", os.Args[0])
 		flag.PrintDefaults()
 		os.Exit(1)
 	}
@@ -38,12 +34,12 @@ func main() {
 		}
 	}
 
-	if *d && *s != "" && *p == "" {
+	if flag.Arg(0) == "del" && flag.Arg(1) != "" && flag.Arg(2) == "" {
 		ini, err := simpleini.Parse(file)
 		if err != nil {
 			log.Fatal(err)
 		}
-		simpleini.DeleteSection(ini, *s)
+		simpleini.DeleteSection(ini, flag.Arg(1))
 
 		if *f == "-" || *f == "" {
 			fmt.Print(ini)
@@ -63,12 +59,12 @@ func main() {
 		os.Exit(0)
 	}
 
-	if *d && *s != "" && *p != "" {
+	if flag.Arg(0) == "del" && flag.Arg(1) != "" && flag.Arg(2) != "" {
 		ini, err := simpleini.Parse(file)
 		if err != nil {
 			log.Fatal(err)
 		}
-		simpleini.DeleteProperty(ini, *s, *p)
+		simpleini.DeleteProperty(ini, flag.Arg(1), flag.Arg(2))
 
 		if *f == "-" || *f == "" {
 			fmt.Print(ini)
@@ -88,7 +84,7 @@ func main() {
 		os.Exit(0)
 	}
 
-	if *s == "" {
+	if flag.Arg(0) == "get" && flag.Arg(1) == "" {
 		ini, err := simpleini.Parse(file)
 		if err != nil {
 			log.Fatal(err)
@@ -100,12 +96,12 @@ func main() {
 		os.Exit(0)
 	}
 
-	if *p == "" {
+	if flag.Arg(0) == "get" && flag.Arg(2) == "" {
 		ini, err := simpleini.Parse(file)
 		if err != nil {
 			log.Fatal(err)
 		}
-		str, err := ini.Properties(*s)
+		str, err := ini.Properties(flag.Arg(1))
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -115,12 +111,12 @@ func main() {
 		os.Exit(0)
 	}
 
-	if *v == "" {
+	if flag.Arg(0) == "get" && flag.Arg(3) == "" {
 		ini, err := simpleini.Parse(file)
 		if err != nil {
 			log.Fatal(err)
 		}
-		str, err := ini.GetString(*s, *p)
+		str, err := ini.GetString(flag.Arg(1), flag.Arg(2))
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -129,32 +125,34 @@ func main() {
 		os.Exit(0)
 	}
 
-	ini, err := simpleini.Parse(file)
-	if err != nil {
-		log.Fatal(err)
-	}
-	ini.SetString(*s, *p, *v)
-	val, err := ini.GetString(*s, *p)
-	if err != nil {
-		log.Fatal(err)
-	}
-	if val != *v {
-		log.Fatal("Bad posterior value")
-		return
-	}
-	var buf bytes.Buffer
-	err = ini.Write(&buf, true)
-	if err != nil {
-		log.Fatal("Write error: %s", err)
-		return
-	}
-	_, err = file.Seek(0, 0)
-	if *f == "-" || *f == "" {
-		ini.Write(os.Stdout, true)
-	} else {
-		ini.Write(file, true)
-	}
-	if err := file.Close(); err != nil {
-		log.Fatal(err)
+	if flag.Arg(0) == "set" {
+		ini, err := simpleini.Parse(file)
+		if err != nil {
+			log.Fatal(err)
+		}
+		ini.SetString(flag.Arg(1), flag.Arg(2), flag.Arg(3))
+		val, err := ini.GetString(flag.Arg(1), flag.Arg(2))
+		if err != nil {
+			log.Fatal(err)
+		}
+		if val != flag.Arg(3) {
+			log.Fatal("Bad posterior value")
+			return
+		}
+		var buf bytes.Buffer
+		err = ini.Write(&buf, true)
+		if err != nil {
+			log.Fatal("Write error: %s", err)
+			return
+		}
+		_, err = file.Seek(0, 0)
+		if *f == "-" || *f == "" {
+			ini.Write(os.Stdout, true)
+		} else {
+			ini.Write(file, true)
+		}
+		if err := file.Close(); err != nil {
+			log.Fatal(err)
+		}
 	}
 }
