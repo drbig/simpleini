@@ -18,9 +18,13 @@ func main() {
 	flag.Parse()
 
 	if len(os.Args) < 2 {
-		fmt.Fprintf(os.Stderr, "Usage: %s set|get|del [section] [parameter] [value]\n", os.Args[0])
+		fmt.Fprintf(os.Stderr, "Usage: %s [-f file] <set|get|del> [section] [parameter] [value]\n", os.Args[0])
 		flag.PrintDefaults()
 		os.Exit(1)
+	}
+
+	if flag.Arg(0) != "get" && flag.Arg(0) != "set" && flag.Arg(0) != "del" {
+		fmt.Println("The first argument must be 'get', 'set', or 'del'.")
 	}
 
 	var file *os.File
