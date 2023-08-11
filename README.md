@@ -9,6 +9,14 @@ Features:
 
 - *What it says on the tin*
 
+## Command
+
+```
+Usage of inihandler:
+  -f string
+        Target INI File ('-' for stdin/stdout)
+```
+
 ## Contributing
 
 Follow the usual GitHub development model:
