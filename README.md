@@ -1,7 +1,10 @@
 # simpleini
 [![BSD 2-Clause "Simplified" License](https://img.shields.io/badge/License-BSD_2--Clause-blue.svg)](https://github.com/pedroalbanese/simpleini/blob/master/LICENSE.md) 
 [![GoDoc](https://godoc.org/github.com/pedroalbanese/simpleini?status.png)](http://godoc.org/github.com/pedroalbanese/simpleini)
+[![GitHub downloads](https://img.shields.io/github/downloads/pedroalbanese/simpleini/total.svg?logo=github&logoColor=white)](https://github.com/pedroalbanese/simpleini/releases)
 [![Go Report Card](https://goreportcard.com/badge/github.com/pedroalbanese/simpleini)](https://goreportcard.com/report/github.com/pedroalbanese/simpleini)
+[![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/pedroalbanese/simpleini)](https://golang.org)
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/pedroalbanese/simpleini)](https://github.com/pedroalbanese/simpleini/releases)
 
 A Go library implementing yet another interface to a particular subset of INI files.
 
