@@ -12,7 +12,7 @@ Features:
 ## Command
 
 ```
-Usage of inihandler:
+Usage: inihandler [-f file] <set|get|del> [section] [parameter] [value]
   -f string
         Target INI File ('-' for stdin/stdout)
 ```
