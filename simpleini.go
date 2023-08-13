@@ -199,10 +199,12 @@ func (i *INI) Write(output io.Writer, prettify bool) error {
 	return buf.Flush()
 }
 
+// DeleteSection removes a section and all its properties from the INI.
 func DeleteSection(ini *INI, section string) {
 	delete(ini.dict, section)
 }
 
+// DeleteProperty removes a specific property from a given section in the INI.
 func DeleteProperty(ini *INI, section string, property string) {
 	properties, present := ini.dict[section]
 	if present {
